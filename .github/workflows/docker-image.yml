@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build, Push, and Deploy to Kubernetes
 
 on:
   push:
@@ -10,32 +10,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 3: Build Docker image
       - name: Build Docker image
         run: |
           docker build . -t vishnuyadav799/wisecow-app:latest
 
+      # Step 4: Push Docker image to Docker Hub
       - name: Push Docker image
         run: |
           docker push vishnuyadav799/wisecow-app:latest
 
+      # Step 5: Install kubectl
+      - name: Install kubectl
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
+      # Step 6: Set up kubeconfig
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
+      # Step 7: Deploy to Kubernetes and monitor rollout
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/wisecow-deployment wisecow=vishnuyadav799/wisecow-app:latest
           kubectl rollout status deployment/wisecow-deployment
+
 
 
 # name: CI/CD Pipeline
