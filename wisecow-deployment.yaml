@@ -15,8 +15,16 @@ spec:
         app: wisecow
     spec:
       containers:
-      - name: wisecow-app
+      - name: wisecow
         image: vishnuyadav799/wisecow-app:latest # Update with your Docker Hub username
         ports:
-        - containerPort: 4499
+        - containerPort: 4499  # Change this if your HTTPS port is different
+        volumeMounts:
+        - name: tls-volume
+          mountPath: /etc/ssl/certs  # Adjust as needed
+          readOnly: true
+      volumes:
+      - name: tls-volume
+        secret:
+          secretName: wisecow-tls
 

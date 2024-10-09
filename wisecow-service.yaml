@@ -7,7 +7,7 @@ spec:
   selector:
     app: wisecow
   ports:
-    - port: 4499
-      targetPort: 4499
-      nodePort: 31507
+    - port: 443  # Use 443 for HTTPS
+      targetPort: 4499  # Your container port for HTTPS
+      nodePort: 31507  # You can choose another NodePort if needed
 
